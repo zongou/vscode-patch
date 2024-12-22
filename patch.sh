@@ -65,4 +65,14 @@ msg "Patching: change default configuration keyboard.dispatch to 'keyCode' for a
 sed -E -i "s^(,properties:\\{\"keyboard\\.dispatch\":\\{scope:1,type:\"string\",enum:\\[\"code\",\"keyCode\"\\],default:)(\"code\")^\\1${isAndroid}?\"keyCode\":\"code\"^" "${js}"
 ## ,properties:{"keyboard.dispatch":{scope:1,type:"string",enum:["code","keyCode"],default:$dt?"keyCode":"code",
 grep -E -o -q ',properties:\{"keyboard\.dispatch":\{scope:1,type:"string",enum:\["code","keyCode"\],default:.{1,3}\?"keyCode":"code",' "${js}"
+
+msg "Patching: fix actionWidget for android"
+sed -E -i 's^(,r\.add\(q\(c,)(ie\.MOUSE_DOWN)(,\(\)=>c\.remove\(\)\)\))(;)^\1\2\3\1"touchstart"\3\1"touchmove"\3\4^g' "${js}"
+# ;c.classList.add("context-view-pointerBlock"),r.add(q(c,ie.POINTER_MOVE,()=>c.remove())),r.add(q(c,ie.MOUSE_DOWN,()=>c.remove())),r.add(q(c,"touchstart",()=>c.remove())),r.add(q(c,"touchmove",()=>c.remove()));
+grep -E -o -q ',r\.add\(\w+\(\w+,\w+\.MOUSE_DOWN,\(\)=>\w+\.remove\(\)\)\),\w+\.add\(\w+\(\w+,"touchstart",\(\)=>\w+\.remove\(\)\)\),\w+\.add\(\w+\(\w+,"touchmove",\(\)=>\w+\.remove\(\)\)\);' "${js}"
+
+sed -E -i "s^(,)(this\\.B\\(this\\.a\\.onDidLayoutChange\\(\\(\\)=>this\\.r\\.hide\\(\\)\\)\\)\\})^\1${isAndroid}||\2^g" "${js}"
+# ,Pdt||this.B(this.a.onDidLayoutChange(()=>this.r.hide()))}
+grep -E -o -q ',.{1,3}\|\|this\.B\(this\.a\.onDidLayoutChange\(\(\)=>this\.r\.hide\(\)\)\)\}' "${js}"
+
 msg "Done"
